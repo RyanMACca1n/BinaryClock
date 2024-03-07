@@ -21,6 +21,7 @@ time_t utc;
 
 uint8_t value[6] = {0, 0, 0, 0, 0, 0};
 uint8_t ledColor[3] = {0, 0, 0};
+float color[3] = {0,0,0}; 
 uint8_t ledState = 1;
 
 
@@ -141,8 +142,31 @@ void loop() {
     // show temperature
     if (ledState == 3) {
       setValues(0, (uint8_t)rtc.getTemperature(), (uint8_t)((rtc.getTemperature() - (uint8_t)rtc.getTemperature())*10));
+      
+      // calculate color mix with linear functions
+      // the temperature range for each function is only 20°C 
+      // red
+      color[0] = 12.75 * rtc.getTemperature() - 255;
+      // green
+      if (rtc.getTemperature() < 20) {
+        color[1] = 12.75 * rtc.getTemperature();  
+      } else {
+        color[1] = -12,75 * rtc.getTemperature() + 510;
+      }
+      // blue
+      color[3] = -12.75 * rtc.getTemperature() + 255;
 
-      setLedColor(255,255,255);
+
+      for (int i = 0; i < 3; i++) {
+        if (color[i] < 0) {
+          color[i] = 0;
+        }
+        if (color[i] > 255) {
+          color[i] = 255;
+        }
+      } 
+
+      setLedColor((uint8_t)color[0], (uint8_t)color[1], (uint8_t)color[2]);
     }
 
     //Serial.print(value[0]);
